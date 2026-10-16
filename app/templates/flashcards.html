@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="eyebrow">STUDY TOOLS</div><h1 class="pagetitle">Flashcards</h1><p class="subtitle">A quick and fun way to review important concepts. Try this sample deck.</p>
+<div class="card" style="max-width:700px;margin:auto" id="flashcards">
+  <div class="row"><h3>Mixed review · Sample deck</h3><span class="pill blue"><span id="flash-index">1</span> / 3</span></div>
+  <button type="button" class="card" id="flashcard" style="width:100%;margin:24px 0;min-height:270px;background:#eef3ff;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;cursor:pointer">
+    <span style="font-size:34px">🧠</span><strong id="flash-text" style="font-family:Outfit;font-size:24px;margin:20px 0;max-width:470px">What is a numerator?</strong><span id="flash-hint">Tap card to reveal the answer</span>
+  </button>
+  <div class="row"><button type="button" id="flash-previous" class="btn outline">← Previous</button><button type="button" id="flash-next" class="btn">Next →</button></div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/flashcards.js') }}" defer></script>{% endblock %}

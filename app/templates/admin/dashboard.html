@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="eyebrow">CONTENT MANAGEMENT · PROTOTYPE</div><h1 class="pagetitle">Admin Studio</h1><p class="subtitle">A design preview of the private area for managing educational content.</p>
+<div class="grid"><a class="card featurecard" href="{{ url_for('admin.lessons') }}"><div class="featureicon">📚</div><h3>Manage Lessons</h3><p>Create, edit, review and publish lessons.</p><div class="arrowlink">Explore →</div></a><a class="card featurecard" href="{{ url_for('admin.questions') }}"><div class="featureicon">🗃️</div><h3>Question Bank</h3><p>Tag questions by grade, subject, topic, year and source.</p><div class="arrowlink">Explore →</div></a><a class="card featurecard" href="{{ url_for('admin.tests') }}"><div class="featureicon">📋</div><h3>Test Builder</h3><p>Assemble quizzes and mock exams from approved questions.</p><div class="arrowlink">Explore →</div></a></div>
+<div class="banner"><b>Prototype only · No authentication or authorization</b><p>This page is visible for design review. It is not a secure administrator area and must not be used to manage real content until authentication and role-based access are implemented.</p></div>
+{% endblock %}

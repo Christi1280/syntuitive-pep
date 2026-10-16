@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="eyebrow">GRADE {{ grade }} · COMING IN A LATER PHASE</div><h1 class="pagetitle">Past Paper Library</h1><p class="subtitle">Browse papers by year and subject once usage rights and content have been verified.</p>
+<div class="placeholder"><div class="big">📄</div><h2>Grade {{ grade }} paper library is not available yet</h2><p>Past papers will be organized by grade after content and usage rights have been verified. No papers are currently available.</p><a class="btn" href="{{ url_for('student.dashboard') }}">Return to dashboard</a></div>
+{% endblock %}

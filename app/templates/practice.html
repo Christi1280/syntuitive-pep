@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="eyebrow">GRADE {{ grade }} PRACTICE CENTER</div><h1 class="pagetitle">Practice makes progress.</h1><p class="subtitle">Choose a test mode and build your confidence, one question at a time.</p>
+{% if grade == 6 %}
+<div class="grid">
+  <a class="card featurecard" href="{{ url_for('practice.demo') }}"><div class="featureicon">🧠</div><h3>Topic Practice</h3><p>Target specific skills with short focused quizzes.</p><div class="arrowlink">Explore →</div></a>
+  <a class="card featurecard" href="{{ url_for('practice.mock_exams') }}"><div class="featureicon">⏱️</div><h3>Mock Examinations</h3><p>Timed, exam-style tests. Content coming later.</p><div class="arrowlink">Explore →</div></a>
+  <a class="card featurecard" href="{{ url_for('practice.past_papers') }}"><div class="featureicon">📄</div><h3>Past Paper Library</h3><p>Browse authorized historical papers by year.</p><div class="arrowlink">Explore →</div></a>
+</div>
+<div class="sectionhead"><h2>Try the test experience</h2></div><div class="card"><div class="row"><div><h3>Sample mathematics question</h3><p>See how automatic marking and explanations will work.</p></div><a class="btn" href="{{ url_for('practice.demo') }}">Try sample →</a></div></div>
+{% else %}
+<div class="placeholder"><div class="big">📝</div><h2>Grade {{ grade }} practice is coming soon</h2><p>No Grade {{ grade }} practice questions or tests are available yet. Grade 6 is the initial content-development priority.</p><a class="btn" href="{{ url_for('learning.grade_learning', grade=grade) }}">View Grade {{ grade }} subjects</a></div>
+{% endif %}
+{% endblock %}

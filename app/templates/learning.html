@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="eyebrow">GRADE {{ grade }} LEARNING CENTER</div><h1 class="pagetitle">Choose a subject</h1><p class="subtitle">Build strong foundations with clear explanations, examples and practice.</p>
+<div class="grid">{% for subject in subjects %}<a class="card featurecard" href="{{ url_for('learning.grade_subject', grade=grade, subject_slug=subject.slug) }}"><div class="subject-top {{ subject.color }}">{{ subject.icon }}</div><h3>{{ subject.name }}</h3>{% if grade == 6 %}<p>{{ subject.topics|length }} example topic categories · Grade {{ grade }}</p><div class="arrowlink">View topics →</div>{% else %}<p>Learning content for this assessment category is coming soon.</p><div class="arrowlink">Coming soon</div>{% endif %}</a>{% endfor %}</div>
+{% if grade == 6 %}<div class="banner"><b>📌 Content development note</b><p>Grade 6 topic categories are illustrative placeholders, not a complete or verified 2027 curriculum specification. We'll confirm the official curriculum before publishing lessons.</p></div>{% else %}<div class="banner"><b>📌 Grade {{ grade }} content coming soon</b><p>These initial assessment categories are placeholders only. No Grade {{ grade }} topics, lessons, or practice questions have been added.</p></div>{% endif %}
+{% endblock %}

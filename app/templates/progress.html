@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="eyebrow">GRADE {{ grade }} LEARNING JOURNEY</div><h1 class="pagetitle">My Progress</h1><p class="subtitle">A preview of your performance dashboard. Browser demo attempts are from the Grade 6 sample quiz and are not grade-specific.</p>
+<div class="grid"><div class="card stat"><div class="staticon">📝</div><div><strong data-progress="attempts">0</strong><span>Demo attempts</span></div></div><div class="card stat"><div class="staticon">🎯</div><div><strong data-progress="accuracy">0%</strong><span>Demo accuracy</span></div></div><div class="card stat"><div class="staticon">🌱</div><div><strong>Starting</strong><span>Your learning journey</span></div></div></div>
+<div class="sectionhead"><h2>Grade {{ grade }} subject progress</h2></div><div class="card">{% for subject in subjects %}<div class="meter"><span>{{ subject.name }}</span><div class="progress"><div style="width:0%"></div></div><b>0%</b></div>{% endfor %}<p class="empty">Full progress tracking will be connected to real lessons and test attempts in the backend.</p></div>
+{% endblock %}
