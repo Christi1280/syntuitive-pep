@@ -1,8 +1,11 @@
 import unittest
 from html.parser import HTMLParser
+from pathlib import Path
 from urllib.parse import urlparse
 
 from app import create_app
+from app.data.activities import FLASHCARDS, PRACTICE_TESTS
+from app.data.assessments.g6_math_2025 import ASSESSMENT
 from app.data.curriculum import CURRICULUM
 
 
@@ -19,173 +22,247 @@ class LocalLinks(HTMLParser):
                     self.urls.append(value)
 
 
-class GradeAwareRouteTests(unittest.TestCase):
+class MvpRouteTests(unittest.TestCase):
     def setUp(self):
         self.client = create_app({"TESTING": True, "SECRET_KEY": "test-secret"}).test_client()
 
-    def test_all_existing_pages_and_grade_pages_render(self):
-        paths = [
-            "/", "/dashboard", "/learning", "/learning/mathematics",
-            "/learning/mathematics/fractions", "/learning/4", "/learning/5",
-            "/learning/6", "/practice", "/practice/demo", "/flashcards",
-            "/quiz-arena", "/progress", "/achievements", "/settings",
-            "/past-papers", "/mock-exams", "/admin", "/admin/lessons",
-            "/admin/questions", "/admin/tests",
-        ]
-        for grade, grade_data in CURRICULUM.items():
-            paths.extend(
-                f"/learning/{grade}/{subject['slug']}"
-                for subject in grade_data["subjects"]
-            )
-            for subject in grade_data["subjects"]:
-                paths.extend(
-                    f"/learning/{grade}/{subject['slug']}/{topic['slug']}"
-                    for topic in subject["topics"]
-                )
-
-        for path in paths:
-            with self.subTest(path=path):
-                response = self.client.get(path, follow_redirects=True)
-                self.assertEqual(response.status_code, 200)
-                self.assertIn(b"SYNTUITIVE", response.data)
-                response.close()
-
-    def test_grade_selection_defaults_to_six_and_persists(self):
-        response = self.client.get("/dashboard")
-        self.assertIn(b"Welcome to Grade 6", response.data)
-        self.assertIn(b"Grade 6 Subjects", response.data)
+    def test_homepage_shows_only_the_three_mvp_activities(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        for feature in (b"Flashcards", b"Practice Tests", b"Play Game"):
+            self.assertIn(feature, response.data)
+        for removed_item in (b"Dashboard", b"Learning Center", b"Settings", b"Achievements"):
+            self.assertNotIn(removed_item, response.data)
         response.close()
 
-        response = self.client.post("/grade", data={"grade": "4"})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.headers["Location"], "/dashboard")
+    def test_grade_selector_defaults_to_six_and_persists_supported_grades(self):
+        response = self.client.get("/")
+        self.assertIn(b'value="6" selected', response.data)
         response.close()
 
-        dashboard = self.client.get("/dashboard")
-        learning = self.client.get("/learning")
-        self.assertIn(b"Welcome to Grade 4", dashboard.data)
-        self.assertIn(b"Grade 4 Subjects", dashboard.data)
-        self.assertIn(b"Literacy", dashboard.data)
-        self.assertIn(b"Numeracy", dashboard.data)
-        self.assertNotIn(b"Science", dashboard.data)
-        self.assertEqual(learning.status_code, 302)
-        self.assertEqual(learning.headers["Location"], "/learning/4")
-        dashboard.close()
-        learning.close()
-
-        progress = self.client.get("/progress")
-        self.assertIn(b"GRADE 4 LEARNING JOURNEY", progress.data)
-        progress.close()
-
-    def test_grade_selector_is_in_shared_header_and_accepts_each_supported_grade(self):
         for grade in (4, 5, 6):
             with self.subTest(grade=grade):
-                response = self.client.post("/grade", data={"grade": str(grade)})
+                response = self.client.post("/grade", data={"grade": str(grade), "return_to": "/flashcards"})
                 self.assertEqual(response.status_code, 302)
+                self.assertEqual(response.headers["Location"], "/flashcards")
                 response.close()
-                page = self.client.get("/dashboard")
+                page = self.client.get("/flashcards")
+                self.assertIn(f"Grade {grade}".encode(), page.data)
                 self.assertIn(f'value="{grade}" selected'.encode(), page.data)
-                self.assertIn(f"Welcome to Grade {grade}".encode(), page.data)
                 page.close()
 
-    def test_grade_categories_and_grade_six_topics_are_separate(self):
-        expected_subjects = {
-            4: (b"Literacy", b"Numeracy"),
-            5: (b"Language Arts", b"Mathematics"),
-            6: (b"Language Arts", b"Mathematics", b"Science", b"Social Studies", b"Ability Test"),
-        }
-        for grade, subjects in expected_subjects.items():
-            with self.subTest(grade=grade):
-                response = self.client.get(f"/learning/{grade}")
-                for name in subjects:
-                    self.assertIn(name, response.data)
-                if grade != 6:
-                    self.assertIn(b"coming soon", response.data.lower())
-                    self.assertNotIn(b"Fractions", response.data)
-                response.close()
-
-        grade6_subject = self.client.get("/learning/6/mathematics")
-        self.assertIn(b"Fractions", grade6_subject.data)
-        self.assertIn(b"Placeholder topics", grade6_subject.data)
-        grade6_subject.close()
-
-        grade4_subject = self.client.get("/learning/4/literacy")
-        self.assertIn(b"content is in development", grade4_subject.data)
-        self.assertNotIn(b"Reading Comprehension", grade4_subject.data)
-        grade4_subject.close()
-
-        grade6_lesson = self.client.get("/learning/6/mathematics/fractions")
-        self.assertIn(b"Let's learn: Fractions", grade6_lesson.data)
-        grade6_lesson.close()
-
-    def test_invalid_grade_subject_and_topic_urls_return_404(self):
-        paths = [
-            "/learning/3",
-            "/learning/7/mathematics",
-            "/learning/4/mathematics",
-            "/learning/5/science",
-            "/learning/6/literacy",
-            "/learning/4/literacy/not-a-topic",
-            "/learning/6/mathematics/not-a-topic",
-            "/learning/not-a-subject",
-        ]
-        for path in paths:
-            with self.subTest(path=path):
-                response = self.client.get(path)
-                self.assertEqual(response.status_code, 404)
-                response.close()
-
-    def test_demo_quiz_remains_grade_six_only(self):
-        grade6_quiz = self.client.get("/practice/demo")
-        self.assertEqual(grade6_quiz.status_code, 200)
-        self.assertIn(b"What is", grade6_quiz.data)
-        grade6_quiz.close()
-
-        self.client.post("/grade", data={"grade": "5"}).close()
-        practice = self.client.get("/practice")
-        self.assertIn(b"Grade 5 practice is coming soon", practice.data)
-        self.assertNotIn(b"Sample mathematics question", practice.data)
-        practice.close()
-        demo = self.client.get("/practice/demo")
-        self.assertEqual(demo.status_code, 302)
-        self.assertEqual(demo.headers["Location"], "/practice")
-        demo.close()
-
-    def test_invalid_grade_selection_is_rejected(self):
+    def test_grade_selection_rejects_invalid_values_and_external_redirects(self):
         for grade in ("3", "7", "not-a-grade", ""):
             with self.subTest(grade=grade):
                 response = self.client.post("/grade", data={"grade": grade})
                 self.assertEqual(response.status_code, 400)
                 response.close()
 
-    def test_static_assets_and_all_rendered_links_resolve(self):
-        assets = (
-            "/static/css/styles.css",
-            "/static/js/main.js",
-            "/static/js/practice.js",
-            "/static/js/flashcards.js",
+        for destination in ("//example.com", "/\\example.com", "https://example.com/"):
+            with self.subTest(destination=destination):
+                response = self.client.post(
+                    "/grade",
+                    data={"grade": "5", "return_to": destination},
+                )
+                self.assertEqual(response.headers["Location"], "/")
+                response.close()
+
+    def test_subject_selectors_use_the_central_curriculum_for_each_grade(self):
+        for grade, grade_data in CURRICULUM.items():
+            self.client.post("/grade", data={"grade": str(grade)}).close()
+            for path in ("/flashcards", "/practice"):
+                with self.subTest(grade=grade, path=path):
+                    response = self.client.get(path)
+                    for subject in grade_data["subjects"]:
+                        self.assertIn(subject["name"].encode(), response.data)
+                    response.close()
+
+    def test_flashcards_retain_the_sample_deck_and_subject_filtering(self):
+        response = self.client.get("/flashcards?subject=science")
+        self.assertIn(b"What is evaporation?", response.data)
+        self.assertIn(b"The process in which liquid changes into gas.", response.data)
+        self.assertIn(b"flashcards.js", response.data)
+        response.close()
+
+        response = self.client.get("/flashcards?subject=mathematics")
+        self.assertIn(b"What is a numerator?", response.data)
+        response.close()
+
+        self.client.post("/grade", data={"grade": "4"}).close()
+        response = self.client.get("/flashcards")
+        self.assertIn(b"No Literacy flashcards yet", response.data)
+        response.close()
+
+    def test_performance_task_is_integrated_for_grade_six_mathematics(self):
+        response = self.client.get("/practice")
+        self.assertIn(b"March 2025 Grade 6 Mathematics Performance Task", response.data)
+        self.assertIn(b"24 questions", response.data)
+        self.assertIn(b"not an official answer key", response.data)
+        self.assertIn(b"data-question-id=\"p1-q1a\"", response.data)
+        self.assertIn(b"data-question-id=\"p4-q6b\"", response.data)
+        self.assertIn(b"question-number-list", response.data)
+        self.assertIn(b"previous-question", response.data)
+        self.assertIn(b"next-question", response.data)
+        self.assertIn(b"retry-test", response.data)
+        self.assertIn(b"hidden", response.data)
+        self.assertIn(b"practice.js", response.data)
+        response.close()
+
+    def test_assessment_question_data_has_unique_ids_valid_answers_and_visuals(self):
+        questions = ASSESSMENT["questions"]
+        self.assertEqual(len(questions), 24)
+        self.assertEqual(len({question["id"] for question in questions}), len(questions))
+        expected_answers = {
+            "p1-q1a": "B",
+            "p1-q1b": "C",
+            "p1-q1c": "B",
+            "p1-q1d": "B",
+            "p1-q2a": "true",
+            "p1-q2b": "false",
+            "p1-q2c": "true",
+            "p2-q3a-car": "C",
+            "p2-q3a-bus": "B",
+            "p2-q3b-teachers": "B",
+            "p2-q3b-students": "C",
+            "p2-q4a-teachers": "B",
+            "p2-q4a-students": "C",
+            "p2-q4a-passengers": "C",
+            "p2-q4b-teachers": "B",
+            "p2-q4b-students": "C",
+            "p2-q4b-passengers": "C",
+            "p2-q4c": "A",
+            "p3-q5a": "C",
+            "p3-q5b": "C",
+            "p3-q5c": "C",
+            "p3-q6a-car": "C",
+            "p3-q6a-bus": "B",
+            "p4-q6b": "A",
+        }
+        self.assertEqual(
+            {question["id"]: question["correct_answer"] for question in questions},
+            expected_answers,
         )
-        for path in assets:
+
+        image_references = set()
+        for question in questions:
+            with self.subTest(question=question["id"]):
+                self.assertTrue(question["question"])
+                self.assertTrue(question["explanation"])
+                self.assertIn(question["part"], ASSESSMENT["parts"])
+                option_values = [option["value"] for option in question["options"]]
+                self.assertEqual(len(option_values), len(set(option_values)))
+                if question["type"] == "multiple_choice":
+                    self.assertEqual(len(question["options"]), 4)
+                else:
+                    self.assertEqual(question["type"], "true_false")
+                    self.assertEqual(option_values, ["true", "false"])
+                self.assertIn(question["correct_answer"], option_values)
+                if "image" in question:
+                    self.assertTrue(question["image_alt"])
+                    image_references.add(question["image"])
+
+        self.assertEqual(
+            image_references,
+            {
+                "images/assessment/baker-town-map.png",
+                "images/assessment/trips-per-day.png",
+                "images/assessment/car-seating.png",
+                "images/assessment/bus-seating.png",
+            },
+        )
+
+        for image in image_references:
+            with self.subTest(image=image):
+                response = self.client.get(f"/static/{image}")
+                self.assertEqual(response.status_code, 200)
+                response.close()
+
+    def test_assessment_calculation_answers_match_source_values(self):
+        correct = {
+            question["id"]: question["correct_answer"]
+            for question in ASSESSMENT["questions"]
+        }
+        self.assertEqual(3 * 100, 300)
+        self.assertEqual(6 * 100, 600)
+        self.assertEqual(30 * 100, 3000)
+        self.assertEqual(6 + 3 + 6 + 5, 20)
+        self.assertEqual(2 + 1 + 2 + 1, 6)
+        self.assertEqual((14 // 7) * 1, 2)
+        self.assertEqual((14 // 7) * 6, 12)
+        self.assertEqual(20 * 4, 80)
+        self.assertEqual(6 * 14, 84)
+        self.assertEqual(3 * 64.50, 193.50)
+        self.assertEqual(20 * 200 + 60 * 100, 10000)
+        self.assertEqual(12 * 200 + 72 * 100, 9600)
+        self.assertEqual(correct["p2-q4c"], "A")
+        self.assertEqual(correct["p4-q6b"], "A")
+
+    def test_practice_script_keeps_navigation_scoring_and_retake_handlers(self):
+        script_path = Path(__file__).parents[1] / "app" / "static" / "js" / "practice.js"
+        script = script_path.read_text(encoding="utf-8")
+        for interaction in (
+            'previous.addEventListener("click"',
+            'next.addEventListener("click"',
+            'button.addEventListener("click"',
+            'submit.addEventListener("click"',
+            'retry.addEventListener("click"',
+            "currentIndex -= 1",
+            "currentIndex += 1",
+            "score += 1",
+            "Your score:",
+            'classList.remove("selected", "correct", "wrong")',
+        ):
+            with self.subTest(interaction=interaction):
+                self.assertIn(interaction, script)
+
+    def test_other_grade_and_subject_practice_pages_remain_available(self):
+        for grade, subject in ((4, "literacy"), (5, "mathematics"), (6, "science")):
+            self.client.post("/grade", data={"grade": str(grade)}).close()
+            response = self.client.get(f"/practice?subject={subject}")
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(f"No ".encode(), response.data)
+            self.assertNotIn(b"March 2025 Grade 6 Mathematics Performance Task", response.data)
+            response.close()
+
+        question = PRACTICE_TESTS[6]["mathematics"][0]
+        self.assertEqual(question["choices"][question["correct_index"]], "3/4")
+        self.assertEqual(len(FLASHCARDS[6]["science"]), 1)
+
+    def test_game_landing_page_is_an_integration_placeholder(self):
+        response = self.client.get("/game")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"No gameplay is available yet", response.data)
+        self.assertIn(b"Home", response.data)
+        response.close()
+
+    def test_removed_pages_are_not_routed(self):
+        for path in (
+            "/dashboard", "/progress", "/achievements", "/settings",
+            "/learning", "/learning/6/mathematics/fractions", "/mock-exams",
+            "/past-papers", "/quiz-arena", "/admin",
+        ):
+            with self.subTest(path=path):
+                response = self.client.get(path)
+                self.assertEqual(response.status_code, 404)
+                response.close()
+
+    def test_static_assets_and_all_rendered_local_links_resolve(self):
+        for path in (
+            "/static/css/styles.css",
+            "/static/js/flashcards.js",
+            "/static/js/practice.js",
+            "/static/images/assessment/baker-town-map.png",
+            "/static/images/assessment/trips-per-day.png",
+            "/static/images/assessment/car-seating.png",
+            "/static/images/assessment/bus-seating.png",
+        ):
             with self.subTest(asset=path):
                 response = self.client.get(path)
                 self.assertEqual(response.status_code, 200)
                 response.close()
 
         parser = LocalLinks()
-        pages = ["/", "/dashboard", "/practice", "/flashcards", "/quiz-arena"]
-        for grade, grade_data in CURRICULUM.items():
-            pages.append(f"/learning/{grade}")
-            pages.extend(
-                f"/learning/{grade}/{subject['slug']}"
-                for subject in grade_data["subjects"]
-            )
-            for subject in grade_data["subjects"]:
-                pages.extend(
-                    f"/learning/{grade}/{subject['slug']}/{topic['slug']}"
-                    for topic in subject["topics"]
-                )
-
-        for page_path in pages:
+        for page_path in ("/", "/flashcards", "/practice", "/game"):
             response = self.client.get(page_path, follow_redirects=True)
             self.assertEqual(response.status_code, 200, page_path)
             parser.feed(response.get_data(as_text=True))

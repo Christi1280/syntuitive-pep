@@ -1,14 +1,88 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="eyebrow">GRADE {{ grade }} PRACTICE CENTER</div><h1 class="pagetitle">Practice makes progress.</h1><p class="subtitle">Choose a test mode and build your confidence, one question at a time.</p>
-{% if grade == 6 %}
-<div class="grid">
-  <a class="card featurecard" href="{{ url_for('practice.demo') }}"><div class="featureicon">🧠</div><h3>Topic Practice</h3><p>Target specific skills with short focused quizzes.</p><div class="arrowlink">Explore →</div></a>
-  <a class="card featurecard" href="{{ url_for('practice.mock_exams') }}"><div class="featureicon">⏱️</div><h3>Mock Examinations</h3><p>Timed, exam-style tests. Content coming later.</p><div class="arrowlink">Explore →</div></a>
-  <a class="card featurecard" href="{{ url_for('practice.past_papers') }}"><div class="featureicon">📄</div><h3>Past Paper Library</h3><p>Browse authorized historical papers by year.</p><div class="arrowlink">Explore →</div></a>
-</div>
-<div class="sectionhead"><h2>Try the test experience</h2></div><div class="card"><div class="row"><div><h3>Sample mathematics question</h3><p>See how automatic marking and explanations will work.</p></div><a class="btn" href="{{ url_for('practice.demo') }}">Try sample →</a></div></div>
+<div class="eyebrow">PRACTICE · GRADE {{ grade }}</div>
+<h1>Practice Tests</h1>
+<p class="intro">Choose a subject and answer each question. Your result is shown when you submit.</p>
+<form class="subject-form" method="get" action="{{ url_for('practice.practice') }}">
+  <label for="practice-subject">Subject</label>
+  <select id="practice-subject" name="subject" onchange="this.form.submit()">
+    {% for option in subjects %}
+      <option value="{{ option.slug }}" {{ 'selected' if option.slug == subject.slug else '' }}>{{ option.name }}</option>
+    {% endfor %}
+  </select>
+</form>
+{% if assessment %}
+<section class="study-panel assessment-panel" id="practice-test"
+         data-assessment-id="{{ assessment.id }}"
+         data-question-count="{{ assessment.questions|length }}">
+  <div class="panel-heading">
+    <div>
+      <h2>{{ assessment.title }}</h2>
+      <p class="assessment-description">{{ assessment.description }}</p>
+    </div>
+    <span class="counter">{{ assessment.questions|length }} questions</span>
+  </div>
+  {% if assessment.answer_key_note %}
+  <p class="answer-key-note">{{ assessment.answer_key_note }}</p>
+  {% endif %}
+  <nav class="question-number-list" id="question-number-list" aria-label="Question numbers">
+    {% for question in assessment.questions %}
+    <button class="question-number{{ ' current' if loop.first else '' }}"
+            type="button"
+            data-question-index="{{ loop.index0 }}"
+            aria-label="Question {{ loop.index }}"
+            aria-current="{{ 'step' if loop.first else 'false' }}">{{ loop.index }}</button>
+    {% endfor %}
+  </nav>
+  <div class="question-content">
+    {% for question in assessment.questions %}
+    <article class="test-question"
+             id="assessment-question-{{ question.id }}"
+             data-question-id="{{ question.id }}"
+             data-correct-answer="{{ question.correct_answer }}"
+             data-explanation="{{ question.explanation }}"
+             data-part="{{ question.part }}"
+             {% if not loop.first %}hidden{% endif %}>
+      <div class="question-part">Part {{ question.part }}: {{ assessment.parts[question.part] }} · {{ question.label }}</div>
+      <h3>{{ question.question }}</h3>
+      {% if question.image %}
+      <figure class="assessment-figure">
+        <a href="{{ url_for('static', filename=question.image) }}" target="_blank" rel="noopener">
+          <img src="{{ url_for('static', filename=question.image) }}" alt="{{ question.image_alt }}" loading="lazy">
+        </a>
+        <figcaption>Open diagram at full size</figcaption>
+      </figure>
+      {% endif %}
+      <div class="answer-list">
+        {% for option in question.options %}
+        <button class="answer" type="button" data-answer="{{ option.value }}" aria-pressed="false">
+          <span class="answer-letter">{{ option.value|upper }}</span><span>{{ option.text }}</span>
+        </button>
+        {% endfor %}
+      </div>
+      <p class="question-feedback" role="status" aria-live="polite" hidden></p>
+    </article>
+    {% endfor %}
+  </div>
+  <div class="question-controls">
+    <button class="button secondary" id="previous-question" type="button" disabled>← Previous</button>
+    <span class="current-question" id="current-question" aria-live="polite">Question 1 of {{ assessment.questions|length }}</span>
+    <button class="button secondary" id="next-question" type="button">Next →</button>
+  </div>
+  <div class="test-actions">
+    <button class="button" id="submit-test" type="button" disabled>Submit test</button>
+    <button class="button secondary" id="retry-test" type="button" hidden>Try Again</button>
+  </div>
+  <div class="test-result" id="test-result" role="status" aria-live="polite" hidden></div>
+</section>
 {% else %}
-<div class="placeholder"><div class="big">📝</div><h2>Grade {{ grade }} practice is coming soon</h2><p>No Grade {{ grade }} practice questions or tests are available yet. Grade 6 is the initial content-development priority.</p><a class="btn" href="{{ url_for('learning.grade_learning', grade=grade) }}">View Grade {{ grade }} subjects</a></div>
+<section class="empty-state">
+  <span class="activity-icon" aria-hidden="true">📝</span>
+  <h2>No {{ subject.name }} test questions yet</h2>
+  <p>There are no sample Grade {{ grade }} {{ subject.name }} test questions yet. Choose another subject or check back as content is added.</p>
+</section>
 {% endif %}
+{% endblock %}
+{% block scripts %}
+{% if assessment %}<script src="{{ url_for('static', filename='js/practice.js') }}" defer></script>{% endif %}
 {% endblock %}

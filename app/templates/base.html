@@ -3,50 +3,36 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f9fe">
   <title>{{ title }} | SYNTUITIVE PEP</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-{% if public_page %}
-  {% block public_content %}{% endblock %}
-{% else %}
-  <div class="shell">
-    <aside class="sidebar" id="sidebar">
-      <a class="brand" href="{{ url_for('student.dashboard') }}"><span class="logo">✦</span><span>SYNTUITIVE<small>PEP LEARNING</small></span></a>
-      <div class="navtitle">YOUR LEARNING</div>
-      <a class="navitem {{ 'active' if active_page == 'Dashboard' else '' }}" href="{{ url_for('student.dashboard') }}"><span class="sym">◫</span>Dashboard</a>
-      <a class="navitem {{ 'active' if active_page == 'Learning Center' else '' }}" href="{{ url_for('learning.learning') }}"><span class="sym">▤</span>Learning Center</a>
-      <a class="navitem {{ 'active' if active_page == 'Practice Tests' else '' }}" href="{{ url_for('practice.practice') }}"><span class="sym">▣</span>Practice Tests</a>
-      <a class="navitem {{ 'active' if active_page == 'Flashcards' else '' }}" href="{{ url_for('practice.flashcards') }}"><span class="sym">▧</span>Flashcards</a>
-      <a class="navitem {{ 'active' if active_page == 'Quiz Arena' else '' }}" href="{{ url_for('practice.quiz_arena') }}"><span class="sym">⚡</span>Quiz Arena</a>
-      <div class="navtitle">YOUR ACCOUNT</div>
-      <a class="navitem {{ 'active' if active_page == 'My Progress' else '' }}" href="{{ url_for('student.progress') }}"><span class="sym">▥</span>My Progress</a>
-      <a class="navitem {{ 'active' if active_page == 'Achievements' else '' }}" href="{{ url_for('student.achievements') }}"><span class="sym">★</span>Achievements</a>
-      <a class="navitem {{ 'active' if active_page == 'Settings' else '' }}" href="{{ url_for('student.settings') }}"><span class="sym">⚙</span>Settings</a>
-      <a class="navitem {{ 'active' if active_page == 'Admin Studio' else '' }}" href="{{ url_for('admin.dashboard') }}"><span class="sym">✎</span>Admin Studio · Prototype</a>
-      <div class="sidebottom">
-        <div class="sidepromo"><b>🌟 You're building your future!</b><p>Keep practising a little each day.</p></div>
-        <a class="navitem" href="{{ url_for('main.index') }}"><span class="sym">⌂</span>Public homepage</a>
-      </div>
-    </aside>
-    <div class="main">
-      <header class="topbar">
-        <div class="row"><button class="mobilemenu" id="mobile-menu" type="button" aria-label="Toggle navigation" aria-expanded="false">☰</button><div class="breadcrumb">Student Portal / <strong>{{ title }}</strong></div></div>
-        <div class="topright">
-          <form class="grade-select-form" action="{{ url_for('student.set_grade') }}" method="post">
-            <label class="sr-only" for="header-grade">Select grade</label>
-            <select class="grade-select" id="header-grade" name="grade" aria-label="Select grade" onchange="this.form.submit()">
-              {% for grade in supported_grades %}<option value="{{ grade }}" {{ 'selected' if current_grade == grade else '' }}>🎓 Grade {{ grade }}</option>{% endfor %}
-            </select>
-          </form>
-          <div class="avatar">S</div>
-        </div>
-      </header>
-      <main class="content">{% block content %}{% endblock %}<div class="footer">SYNTUITIVE PEP · Design prototype · Sample content only · © 2026 SYNTUITIVE</div></main>
-    </div>
-  </div>
-{% endif %}
-<script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
-{% block scripts %}{% endblock %}
+  <header class="site-header">
+    <a class="brand" href="{{ url_for('main.index') }}">
+      <span class="logo" aria-hidden="true">✦</span>
+      <span>SYNTUITIVE<small>PEP PRACTICE</small></span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a class="{{ 'active' if active_page == 'Home' else '' }}" href="{{ url_for('main.index') }}">Home</a>
+      <a class="{{ 'active' if active_page == 'Flashcards' else '' }}" href="{{ url_for('practice.flashcards') }}">Flashcards</a>
+      <a class="{{ 'active' if active_page == 'Practice Tests' else '' }}" href="{{ url_for('practice.practice') }}">Practice Tests</a>
+      <a class="{{ 'active' if active_page == 'Game' else '' }}" href="{{ url_for('practice.game') }}">Game</a>
+    </nav>
+    <form class="grade-form" action="{{ url_for('main.set_grade') }}" method="post">
+      <input type="hidden" name="return_to" value="{{ request.full_path if request.query_string else request.path }}">
+      <label for="header-grade">Grade</label>
+      <select id="header-grade" name="grade" aria-label="Select grade" onchange="this.form.submit()">
+        {% for grade in supported_grades %}
+          <option value="{{ grade }}" {{ 'selected' if current_grade == grade else '' }}>Grade {{ grade }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </header>
+  <main class="page">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">SYNTUITIVE PEP · Sample learning activities</footer>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

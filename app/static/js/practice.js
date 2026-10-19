@@ -1,57 +1,139 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const quiz = document.querySelector("#demo-quiz");
-  if (!quiz) return;
+  const test = document.querySelector("#practice-test");
+  if (!test) return;
 
-  const correctIndex = Number(quiz.dataset.correctIndex);
-  const answers = [...quiz.querySelectorAll("[data-answer]")];
-  const submitButton = quiz.querySelector("#submit-answer");
-  const tryAgainButton = quiz.querySelector("#try-again");
-  const result = quiz.querySelector("#quiz-result");
-  const progress = quiz.querySelector("#quiz-progress");
-  let selectedIndex = null;
+  const questions = [...test.querySelectorAll(".test-question")];
+  const numberButtons = [...test.querySelectorAll(".question-number")];
+  const previous = test.querySelector("#previous-question");
+  const next = test.querySelector("#next-question");
+  const currentQuestion = test.querySelector("#current-question");
+  const submit = test.querySelector("#submit-test");
+  const retry = test.querySelector("#retry-test");
+  const result = test.querySelector("#test-result");
+  let currentIndex = 0;
   let submitted = false;
 
-  const reset = () => {
-    selectedIndex = null;
-    submitted = false;
-    answers.forEach((answer) => answer.classList.remove("selected", "correct", "wrong"));
-    result.classList.add("hidden");
-    result.classList.remove("error");
-    result.textContent = "";
-    progress.style.width = "20%";
-    submitButton.classList.remove("hidden");
-    submitButton.disabled = true;
-    tryAgainButton.classList.add("hidden");
+  const selectedAnswers = () => questions.map((question) =>
+    question.querySelector(".answer.selected")
+  );
+
+  const renderQuestion = () => {
+    const selections = selectedAnswers();
+    questions.forEach((question, index) => {
+      question.hidden = index !== currentIndex;
+    });
+    numberButtons.forEach((button, index) => {
+      button.classList.toggle("current", index === currentIndex);
+      button.classList.toggle("answered", Boolean(selections[index]));
+      button.setAttribute("aria-current", index === currentIndex ? "step" : "false");
+    });
+    currentQuestion.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+    previous.disabled = currentIndex === 0;
+    next.disabled = currentIndex === questions.length - 1;
   };
 
-  answers.forEach((answer) => {
-    answer.addEventListener("click", () => {
-      if (submitted) return;
-      selectedIndex = Number(answer.dataset.answer);
-      answers.forEach((item) => item.classList.toggle("selected", item === answer));
-      submitButton.disabled = false;
+  const updateSubmitState = () => {
+    submit.disabled = submitted || selectedAnswers().some((selection) => !selection);
+  };
+
+  questions.forEach((question, questionIndex) => {
+    const answers = [...question.querySelectorAll(".answer")];
+    answers.forEach((answer) => {
+      answer.addEventListener("click", () => {
+        if (submitted) return;
+        answers.forEach((option) => {
+          const selected = option === answer;
+          option.classList.toggle("selected", selected);
+          option.setAttribute("aria-pressed", String(selected));
+        });
+        numberButtons[questionIndex].classList.add("answered");
+        updateSubmitState();
+      });
     });
   });
 
-  submitButton.addEventListener("click", () => {
-    if (selectedIndex === null || submitted) return;
-    submitted = true;
-    const isCorrect = selectedIndex === correctIndex;
-    answers[correctIndex].classList.add("correct");
-    if (!isCorrect) answers[selectedIndex].classList.add("wrong");
-
-    const attempts = Number(localStorage.getItem("pep_attempts") || 0) + 1;
-    const correct = Number(localStorage.getItem("pep_correct") || 0) + Number(isCorrect);
-    localStorage.setItem("pep_attempts", String(attempts));
-    localStorage.setItem("pep_correct", String(correct));
-
-    result.classList.remove("hidden");
-    result.classList.toggle("error", !isCorrect);
-    result.innerHTML = `<b>${isCorrect ? "Correct! 🎉" : "Not quite. The correct answer is B."}</b><p>To add ½ and ¼, rewrite ½ as 2/4. Then 2/4 + 1/4 = 3/4.</p>`;
-    progress.style.width = "100%";
-    submitButton.classList.add("hidden");
-    tryAgainButton.classList.remove("hidden");
+  previous.addEventListener("click", () => {
+    if (currentIndex > 0) {
+      currentIndex -= 1;
+      renderQuestion();
+    }
   });
 
-  tryAgainButton.addEventListener("click", reset);
+  next.addEventListener("click", () => {
+    if (currentIndex < questions.length - 1) {
+      currentIndex += 1;
+      renderQuestion();
+    }
+  });
+
+  numberButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      currentIndex = Number(button.dataset.questionIndex);
+      renderQuestion();
+    });
+  });
+
+  submit.addEventListener("click", () => {
+    const selections = selectedAnswers();
+    if (submitted || selections.some((selection) => !selection)) return;
+    submitted = true;
+    let score = 0;
+
+    questions.forEach((question, index) => {
+      const selected = selections[index];
+      const correctAnswer = question.dataset.correctAnswer;
+      const isCorrect = selected.dataset.answer === correctAnswer;
+      if (isCorrect) score += 1;
+
+      const answers = [...question.querySelectorAll(".answer")];
+      const correctOption = answers.find((answer) => answer.dataset.answer === correctAnswer);
+      correctOption.classList.add("correct");
+      if (!isCorrect) selected.classList.add("wrong");
+      answers.forEach((answer) => {
+        answer.disabled = true;
+        answer.setAttribute("aria-disabled", "true");
+      });
+
+      const feedback = question.querySelector(".question-feedback");
+      const correctText = correctOption.querySelector("span:last-child").textContent;
+      const answerText = correctAnswer === "true" || correctAnswer === "false"
+        ? correctText
+        : `${correctOption.querySelector(".answer-letter").textContent}. ${correctText}`;
+      feedback.textContent = `${isCorrect ? "Correct." : `Correct answer: ${answerText}.`} ${question.dataset.explanation}`.trim();
+      feedback.hidden = false;
+      feedback.classList.toggle("incorrect", !isCorrect);
+    });
+
+    result.textContent = `Your score: ${score} out of ${questions.length}.`;
+    result.hidden = false;
+    submit.hidden = true;
+    retry.hidden = false;
+  });
+
+  retry.addEventListener("click", () => {
+    submitted = false;
+    currentIndex = 0;
+    questions.forEach((question) => {
+      question.querySelectorAll(".answer").forEach((answer) => {
+        answer.disabled = false;
+        answer.removeAttribute("aria-disabled");
+        answer.setAttribute("aria-pressed", "false");
+        answer.classList.remove("selected", "correct", "wrong");
+      });
+      const feedback = question.querySelector(".question-feedback");
+      feedback.hidden = true;
+      feedback.classList.remove("incorrect");
+      feedback.textContent = "";
+    });
+    numberButtons.forEach((button) => button.classList.remove("answered"));
+    result.hidden = true;
+    result.textContent = "";
+    submit.hidden = false;
+    retry.hidden = true;
+    renderQuestion();
+    updateSubmitState();
+  });
+
+  renderQuestion();
+  updateSubmitState();
 });

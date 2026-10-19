@@ -24,15 +24,9 @@ def create_app(test_config=None):
             "supported_grades": SUPPORTED_GRADES,
         }
 
-    from app.routes.admin import admin_bp
-    from app.routes.learning import learning_bp
     from app.routes.main import main_bp
     from app.routes.practice import practice_bp
-    from app.routes.student import student_bp
 
     app.register_blueprint(main_bp)
-    app.register_blueprint(student_bp)
-    app.register_blueprint(learning_bp)
     app.register_blueprint(practice_bp)
-    app.register_blueprint(admin_bp)
     return app

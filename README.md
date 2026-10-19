@@ -1,6 +1,6 @@
 # SYNTUITIVE PEP
 
-SYNTUITIVE PEP is a Flask/Jinja2 implementation of the existing responsive website design prototype. The public landing page, student portal, learning pages, practice experience, flashcards, and prototype administrator screens are included. Educational content and all backend account/content systems remain illustrative.
+SYNTUITIVE PEP is a small Flask application for Grade 4–6 PEP preparation. The MVP contains three activities: flashcards, multiple-choice practice tests, and a landing page reserved for a future educational game. Grade selection is kept in the Flask session; activity results are not persisted.
 
 ## Requirements
 
@@ -22,7 +22,7 @@ Open <http://127.0.0.1:5000/>. The Flask development server is for local develop
 
 ## Tests
 
-Run the route, template, navigation-link, and static-asset checks with:
+Run the route, curriculum-selector, activity-content, assessment-data, calculation, interaction-hook, navigation-link, and static-asset checks with:
 
 ```powershell
 python -m unittest discover -s tests
@@ -30,19 +30,15 @@ python -m unittest discover -s tests
 
 ## Project structure
 
-- `app/__init__.py` creates the Flask application and registers blueprints.
-- `app/routes/` contains route groups for the public site, learning, practice, student pages, and prototype admin pages.
-- `app/data/curriculum.py` is the single grade → subject → topic → lessons data structure. Its assessment categories are illustrative and are not an official 2027 specification; unavailable lessons remain empty rather than fabricated.
-- `app/templates/` contains separate Jinja2 templates with shared portal layout in `base.html`.
-- `app/static/css/styles.css` is the original website stylesheet.
-- `app/static/js/` contains shared navigation, demo quiz, and flashcard behavior.
-- `app/models/` is reserved for future persistence models; no database is configured.
-- `tests/` contains Flask route and asset tests.
+- `app/__init__.py` creates the Flask application and registers the MVP routes.
+- `app/routes/` contains the homepage/grade-selection routes and the three activity routes.
+- `app/data/curriculum.py` retains the centralized grade → subject → topic curriculum structure. Categories are illustrative and not a verified official curriculum map.
+- `app/data/activities.py` contains the sample flashcards and practice question.
+- `app/data/assessments/g6_math_2025.py` contains the March 2025 Grade 6 Mathematics Performance Task data and calculated answer explanations.
+- `app/templates/` contains the shared layout, homepage, flashcards, practice test, and future-game landing page.
+- `app/static/css/styles.css` provides responsive layouts for phones, tablets, and desktops.
+- `app/static/js/` contains the interactive flashcard and paginated practice-test behavior.
+- `app/static/images/assessment/` contains the map, trip graph, and vehicle diagrams used by the Grade 6 Mathematics assessment.
+- `app/models/` remains reserved for future persistence models; no database is configured.
 
-## Prototype limitations
-
-Student account/authentication, PostgreSQL, persistent learning content, real progress tracking, multiplayer, and content administration are not implemented. The Admin Studio and its subpages are publicly accessible design prototypes and **must not** be used to manage real content or considered secure. Do not expose this development application as a production service before authentication, authorization, secret management, and deployment hardening are implemented.
-
-Quiz attempts are stored only in the current browser using localStorage. Subject topics and sample lesson text are illustrative, not a verified complete Jamaican PEP curriculum map. Google Fonts are used when online, with system font fallbacks.
-
-The selected grade (default Grade 6) is stored in the Flask session cookie. The development app uses a local-only fallback secret; set `FLASK_SECRET_KEY` to a private random value for any non-development environment. Grades 4 and 5 currently expose their requested subject categories only, with topics, lessons, and practice material marked coming soon.
+The game page is an integration point only; it does not implement gameplay. The assessment's answer explanations are calculated from the information shown in the task and are not an official answer key. There is no authentication, account system, progress tracking, database, or persistent quiz history. Grade 4 and 5 activity content, and non-mathematics Grade 6 practice questions, have not yet been added. Set `FLASK_SECRET_KEY` to a private random value outside local development.

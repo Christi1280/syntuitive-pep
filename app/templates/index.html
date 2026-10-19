@@ -1,16 +1,37 @@
 {% extends "base.html" %}
-{% block public_content %}
-<div class="landing">
-  <nav class="landingnav">
-    <a class="brand" href="{{ url_for('main.index') }}"><span class="logo">✦</span><span>SYNTUITIVE<small>PEP LEARNING</small></span></a>
-    <div class="landinglinks"><a class="hide-sm" href="#features">Features</a><a class="hide-sm" href="#how">How it works</a><a class="btn" href="{{ url_for('student.dashboard') }}">View student portal →</a></div>
-  </nav>
-  <section class="landinghero"><div><div class="eyebrow">MADE FOR JAMAICAN LEARNERS 🇯🇲</div><h1>Big dreams start with <em>small steps.</em></h1><p>Learn, practise and grow your confidence for PEP with bite-sized lessons, exam-style questions and fun challenges.</p><a class="btn" href="{{ url_for('student.dashboard') }}">Explore the learning portal →</a> <a class="btn outline" href="{{ url_for('learning.learning') }}">Browse subjects</a></div><div class="landingart">📚✨🎓</div></section>
-  <section class="landingsection" id="features"><div class="eyebrow">EVERYTHING IN ONE PLACE</div><h2>A smarter way to prepare for PEP</h2><div class="grid">
-    <a class="card featurecard" href="{{ url_for('learning.learning') }}"><div class="featureicon">📖</div><h3>Learn at your pace</h3><p>Simple lessons with examples and helpful explanations.</p><div class="arrowlink">Explore →</div></a>
-    <a class="card featurecard" href="{{ url_for('practice.practice') }}"><div class="featureicon">📝</div><h3>Practise with purpose</h3><p>Build confidence through topic quizzes and mock exams.</p><div class="arrowlink">Explore →</div></a>
-    <a class="card featurecard" href="{{ url_for('practice.quiz_arena') }}"><div class="featureicon">🏆</div><h3>Make learning fun</h3><p>Flashcards, achievements and friendly quiz challenges.</p><div class="arrowlink">Explore →</div></a>
-  </div><div class="banner" id="how"><h3>Designed for Grades 4–6. Starting with Grade 6.</h3><p>Our initial launch focuses on Grade 6 learning. The platform is designed to expand to Grades 4 and 5.</p></div></section>
-  <div class="footer" style="padding-bottom:30px">SYNTUITIVE PEP · A learning experience by SYNTUITIVE · Prototype</div>
-</div>
+{% set active_page = 'Home' %}
+{% block content %}
+<section class="hero">
+  <div class="eyebrow">MADE FOR JAMAICAN LEARNERS</div>
+  <h1>PEP practice, <span>made simple.</span></h1>
+  <p>Review a concept, test what you know, or explore a future learning game. Choose your grade and get started.</p>
+  <div class="hero-actions">
+    <a class="button" href="{{ url_for('practice.practice') }}">Start a practice test</a>
+    <a class="button secondary" href="{{ url_for('practice.flashcards') }}">Browse flashcards</a>
+  </div>
+</section>
+<section class="activities" aria-labelledby="activities-heading">
+  <div class="eyebrow">THREE WAYS TO PREPARE</div>
+  <h2 id="activities-heading">Choose your activity</h2>
+  <div class="activity-grid">
+    <a class="activity-card" href="{{ url_for('practice.flashcards') }}">
+      <span class="activity-icon" aria-hidden="true">🗂️</span>
+      <h3>Flashcards</h3>
+      <p>Flip through questions and terms, then reveal each answer.</p>
+      <span class="card-link">Review cards <span aria-hidden="true">→</span></span>
+    </a>
+    <a class="activity-card" href="{{ url_for('practice.practice') }}">
+      <span class="activity-icon" aria-hidden="true">📝</span>
+      <h3>Practice Tests</h3>
+      <p>Answer multiple-choice questions and check your understanding.</p>
+      <span class="card-link">Take a test <span aria-hidden="true">→</span></span>
+    </a>
+    <a class="activity-card" href="{{ url_for('practice.game') }}">
+      <span class="activity-icon" aria-hidden="true">🎮</span>
+      <h3>Play Game</h3>
+      <p>A home for a future educational game experience.</p>
+      <span class="card-link">Explore the game area <span aria-hidden="true">→</span></span>
+    </a>
+  </div>
+</section>
 {% endblock %}
