@@ -1,12 +1,28 @@
+
 {% extends "base.html" %}
+
 {% block content %}
 <div class="eyebrow">PLAY &amp; LEARN</div>
-<h1>Play Game</h1>
-<p class="intro">A space for an educational game to complement your PEP preparation.</p>
-<section class="game-placeholder">
-  <span class="game-icon" aria-hidden="true">🎮</span>
-  <h2>Something fun is on the way</h2>
-  <p>This is the starting point for a future educational game. No gameplay is available yet.</p>
-  <a class="button secondary" href="{{ url_for('main.index') }}">Back to Home</a>
+
+<h1>PEP Space Race</h1>
+
+<p class="intro">
+  Race through a space station, answer PEP questions,
+  unlock doors, and reach the finish line!
+</p>
+
+<section class="space-race-container">
+  <iframe
+    id="space-race-frame"
+    src="{{ url_for('static', filename='games/pep-space-race/index.html') }}"
+    title="PEP Space Race"
+    allow="fullscreen"
+    allowfullscreen>
+  </iframe>
 </section>
+
+<p class="game-instructions">
+  Use WASD to move, your mouse to look around, and E to
+  answer questions at each door.
+</p>
 {% endblock %}

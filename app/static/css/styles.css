@@ -164,3 +164,39 @@ h1, h2, h3 { font-family: Outfit, "DM Sans", sans-serif; letter-spacing: -.035em
   .empty-state, .game-placeholder { padding: 25px 18px; }
   .card-navigation .button { padding: 10px 12px; }
 }
+
+/* PEP Space Race */
+
+.space-race-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 30px auto;
+    background: #111827;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+}
+
+#space-race-frame {
+    display: block;
+    width: 100%;
+    height: 750px;
+    border: none;
+}
+
+.game-instructions {
+    text-align: center;
+    color: #64748b;
+    margin-top: 16px;
+    font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+    #space-race-frame {
+        height: 500px;
+    }
+
+    .space-race-container {
+        border-radius: 8px;
+    }
+}
