@@ -20,6 +20,7 @@
       <a class="{{ 'active' if active_page == 'Game' else '' }}" href="{{ url_for('practice.game') }}">Game</a>
     </nav>
     <form class="grade-form" action="{{ url_for('main.set_grade') }}" method="post">
+      <input type="hidden" name="grade_csrf_token" value="{{ grade_csrf_token }}">
       <input type="hidden" name="return_to" value="{{ request.full_path if request.query_string else request.path }}">
       <label for="header-grade">Grade</label>
       <select id="header-grade" name="grade" aria-label="Select grade" onchange="this.form.submit()">

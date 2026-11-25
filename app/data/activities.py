@@ -1,4 +1,4 @@
-"""Sample activity content retained from the original prototype."""
+"""Sample flashcards grouped by grade and subject."""
 
 FLASHCARDS = {
     6: {
@@ -18,21 +18,6 @@ FLASHCARDS = {
             {
                 "question": "What is a synonym?",
                 "answer": "A word with the same or nearly the same meaning as another.",
-            },
-        ],
-    },
-}
-
-PRACTICE_TESTS = {
-    6: {
-        "mathematics": [
-            {
-                "question": "What is ½ + ¼?",
-                "choices": ["2/6", "3/4", "1/6", "2/4"],
-                "correct_index": 1,
-                "explanation": (
-                    "Rewrite ½ as 2/4. Then 2/4 + 1/4 = 3/4."
-                ),
             },
         ],
     },

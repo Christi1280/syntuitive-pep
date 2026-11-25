@@ -1,44 +1,133 @@
 # SYNTUITIVE PEP
 
-SYNTUITIVE PEP is a small Flask application for Grade 4–6 PEP preparation. The MVP contains three activities: flashcards, multiple-choice practice tests, and a landing page reserved for a future educational game. Grade selection is kept in the Flask session; activity results are not persisted.
+SYNTUITIVE PEP is an educational web application I am developing to help Jamaican primary school students prepare for their Primary Exit Profile (PEP) examinations.
 
-## Requirements
+The idea behind this project is to make studying more interactive and engaging through practice questions, flashcards, worked explanations, and educational games.
 
-- Python 3.10 or newer
-- Flask (installed from `requirements.txt`)
+The project is currently in active development.
 
-## Install and run
+## Features
 
-From the repository root, create and activate a virtual environment, then install Flask:
+- **Grade selection:** Students can select Grade 4, 5, or 6 and browse subjects for their grade.
+- **Flashcards:** Students can review concepts in Mathematics, Science, and Language Arts.
+- **Practice assessments:** Interactive questions with scoring, answer explanations, and the option to retake assessments.
+- **Game-based learning:** An integrated Unity WebGL game called PEP Space Race, designed to combine learning with gameplay.
+- **Session management:** The website remembers the student's selected grade as they navigate between pages.
+
+Most of the current learning content is focused on Grade 6, with plans to expand coverage across other grades and subjects.
+
+## Technologies Used
+
+| Technology | Purpose |
+|---|---|
+| Python | Backend development |
+| Flask | Web application framework |
+| Jinja | HTML templating |
+| HTML & CSS | Website structure and styling |
+| JavaScript | Interactive features and assessment scoring |
+| Unity & C# | Educational game development |
+| WebGL | Running the Unity game in the browser |
+| Git & GitHub | Version control |
+
+## How It Works
+
+The website uses Flask to manage routes, load educational content, and render pages. JavaScript handles interactive features such as flipping flashcards, navigating between questions, calculating scores, and displaying feedback.
+
+The project is organized into separate modules for routes, educational content, templates, and static files. This makes it easier to maintain the application and add new features as the platform grows.
+
+The application also includes CSRF protection, signed session cookies, environment-based configuration, and automated tests.
+
+## PEP Space Race
+
+PEP Space Race is an educational game developed separately in Unity and integrated into the website using WebGL.
+
+The concept is simple: players must answer PEP-style questions correctly to unlock doors and progress through a level. The goal is to reach the finish line before their opponent.
+
+The game is still in development, with plans to introduce more questions, additional levels, and online multiplayer functionality.
+
+## Running the Project Locally
+
+Python 3.10 or newer is required.
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Christi1280/syntuitive-pep.git
+cd syntuitive-pep
+```
+
+Create a virtual environment:
 
 ```powershell
-py -m venv .venv
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+```
+
+Install the required dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Start the application:
+
+```bash
 python run.py
 ```
 
-Open <http://127.0.0.1:5000/>. The Flask development server is for local development only.
+Open the following address in your browser:
 
-## Tests
+http://127.0.0.1:5000/
 
-Run the route, curriculum-selector, activity-content, assessment-data, calculation, interaction-hook, navigation-link, and static-asset checks with:
+For production deployments, a private `FLASK_SECRET_KEY` must be configured through environment variables.
 
-```powershell
+## Testing
+
+The project includes automated tests covering:
+
+- Grade and subject selection
+- Assessment questions and answers
+- Security and form validation
+- Static file delivery
+- Unity WebGL integration
+
+Optional browser tests also cover flashcard interactions, assessment navigation, scoring, and retakes.
+
+To run the tests:
+
+```bash
 python -m unittest discover -s tests
 ```
 
-## Project structure
+## Future Development
 
-- `app/__init__.py` creates the Flask application and registers the MVP routes.
-- `app/routes/` contains the homepage/grade-selection routes and the three activity routes.
-- `app/data/curriculum.py` retains the centralized grade → subject → topic curriculum structure. Categories are illustrative and not a verified official curriculum map.
-- `app/data/activities.py` contains the sample flashcards and practice question.
-- `app/data/assessments/g6_math_2025.py` contains the March 2025 Grade 6 Mathematics Performance Task data and calculated answer explanations.
-- `app/templates/` contains the shared layout, homepage, flashcards, practice test, and future-game landing page.
-- `app/static/css/styles.css` provides responsive layouts for phones, tablets, and desktops.
-- `app/static/js/` contains the interactive flashcard and paginated practice-test behavior.
-- `app/static/images/assessment/` contains the map, trip graph, and vehicle diagrams used by the Grade 6 Mathematics assessment.
-- `app/models/` remains reserved for future persistence models; no database is configured.
+There are several features I plan to introduce as the project develops:
 
-The game page is an integration point only; it does not implement gameplay. The assessment's answer explanations are calculated from the information shown in the task and are not an official answer key. There is no authentication, account system, progress tracking, database, or persistent quiz history. Grade 4 and 5 activity content, and non-mathematics Grade 6 practice questions, have not yet been added. Set `FLASK_SECRET_KEY` to a private random value outside local development.
+- More learning content across Grades 4, 5, and 6
+- Original PEP-style practice assessments
+- Student accounts
+- Saved assessment results and progress tracking
+- Additional educational games
+- Online multiplayer
+- Improved mobile support and accessibility
+
+## Educational Content and Third-Party Assets
+
+The existing PEP examination questions and diagrams are being used as temporary placeholder content while I develop and test the platform.
+
+The intended production release will feature original PEP-style questions developed specifically for the application and aligned with the Jamaican primary school curriculum.
+
+PEP Space Race also uses third-party assets obtained from the Unity Asset Store. All third-party materials remain subject to their respective copyrights and license terms. Redistribution permissions have not yet been fully verified.
+
+This is an independent project and is not officially affiliated with or endorsed by any examination authority.
+
+## Author
+
+**Christian Williams**
+
+Software Developer | Georgia State University Graduate
+
+Developed under **SYNTUITIVE**.
+
+- [GitHub](https://github.com/Christi1280)
+- [LinkedIn](https://www.linkedin.com/in/christianwilliams1280/)

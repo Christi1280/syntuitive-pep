@@ -4,7 +4,6 @@ import re
 
 
 DEFAULT_GRADE = 6
-SUPPORTED_GRADES = (4, 5, 6)
 
 
 def _topic(name):
@@ -22,7 +21,6 @@ def _subject(name, slug, icon, color="", topics=()):
         "slug": slug,
         "icon": icon,
         "color": color,
-        "grade": None,
         "topics": [_topic(topic) for topic in topics],
     }
 
@@ -69,9 +67,7 @@ CURRICULUM = {
     },
 }
 
-for _grade_data in CURRICULUM.values():
-    for _subject_data in _grade_data["subjects"]:
-        _subject_data["grade"] = _grade_data["grade"]
+SUPPORTED_GRADES = tuple(CURRICULUM)
 
 
 def is_supported_grade(grade):
@@ -89,10 +85,3 @@ def get_subject(grade, subject_slug):
     if subjects is None:
         return None
     return next((subject for subject in subjects if subject["slug"] == subject_slug), None)
-
-
-def get_topic(subject, topic_slug):
-    return next(
-        (topic for topic in subject["topics"] if topic["slug"] == topic_slug),
-        None,
-    )

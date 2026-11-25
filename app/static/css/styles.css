@@ -64,12 +64,12 @@ h1, h2, h3 { font-family: Outfit, "DM Sans", sans-serif; letter-spacing: -.035em
 .activities { padding-top: 52px; }
 .activities h2 { margin-bottom: 19px; font-size: 25px; }
 .activity-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 17px; }
-.activity-card, .study-panel, .empty-state, .game-placeholder { border: 1px solid var(--line); border-radius: 17px; background: var(--surface); box-shadow: 0 12px 35px #172f710c; }
+.activity-card, .study-panel, .empty-state { border: 1px solid var(--line); border-radius: 17px; background: var(--surface); box-shadow: 0 12px 35px #172f710c; }
 .activity-card { min-height: 230px; padding: 23px; transition: transform .18s, border-color .18s; }
 .activity-card:hover { transform: translateY(-3px); border-color: #bdccf8; }
 .activity-icon { width: 49px; height: 49px; display: grid; place-items: center; border-radius: 14px; background: var(--pale); font-size: 24px; }
 .activity-card h3 { margin: 16px 0 7px; font-size: 19px; }
-.activity-card p, .empty-state p, .game-placeholder p { margin-bottom: 15px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.activity-card p, .empty-state p { margin-bottom: 15px; color: var(--muted); font-size: 13px; line-height: 1.65; }
 .card-link { color: var(--blue-dark); font-size: 12px; font-weight: 800; }
 
 .subject-form { width: fit-content; margin: 0 0 20px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; background: white; }
@@ -120,12 +120,10 @@ h1, h2, h3 { font-family: Outfit, "DM Sans", sans-serif; letter-spacing: -.035em
 .current-question { color: var(--muted); font-size: 12px; font-weight: 800; white-space: nowrap; }
 .test-actions { justify-content: flex-end; }
 .test-actions[hidden], .question-controls[hidden] { display: none; }
-.empty-state, .game-placeholder { max-width: 760px; padding: 34px; text-align: center; }
+.empty-state { max-width: 760px; padding: 34px; text-align: center; }
 .empty-state .activity-icon { margin: 0 auto 15px; }
-.empty-state h2, .game-placeholder h2 { margin-bottom: 8px; font-size: 22px; }
-.empty-state p, .game-placeholder p { max-width: 500px; margin: 0 auto 18px; }
-.game-placeholder { padding: clamp(30px, 6vw, 58px); }
-.game-icon { display: block; margin-bottom: 15px; font-size: 48px; }
+.empty-state h2 { margin-bottom: 8px; font-size: 22px; }
+.empty-state p { max-width: 500px; margin: 0 auto 18px; }
 .site-footer { min-height: 60px; padding: 20px 24px; border-top: 1px solid var(--line); background: white; color: #8995a9; font-size: 11px; text-align: center; }
 [hidden] { display: none !important; }
 
@@ -161,7 +159,7 @@ h1, h2, h3 { font-family: Outfit, "DM Sans", sans-serif; letter-spacing: -.035em
   .question-controls { gap: 6px; }
   .question-controls .button { min-width: 0; padding: 9px 10px; font-size: 11px; }
   .current-question { font-size: 11px; }
-  .empty-state, .game-placeholder { padding: 25px 18px; }
+  .empty-state { padding: 25px 18px; }
   .card-navigation .button { padding: 10px 12px; }
 }
 

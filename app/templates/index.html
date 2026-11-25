@@ -1,10 +1,9 @@
 {% extends "base.html" %}
-{% set active_page = 'Home' %}
 {% block content %}
 <section class="hero">
   <div class="eyebrow">MADE FOR JAMAICAN LEARNERS</div>
   <h1>PEP practice, <span>made simple.</span></h1>
-  <p>Review a concept, test what you know, or explore a future learning game. Choose your grade and get started.</p>
+  <p>Review a concept, test what you know, or try PEP Space Race. Choose your grade and get started.</p>
   <div class="hero-actions">
     <a class="button" href="{{ url_for('practice.practice') }}">Start a practice test</a>
     <a class="button secondary" href="{{ url_for('practice.flashcards') }}">Browse flashcards</a>
@@ -23,13 +22,13 @@
     <a class="activity-card" href="{{ url_for('practice.practice') }}">
       <span class="activity-icon" aria-hidden="true">📝</span>
       <h3>Practice Tests</h3>
-      <p>Answer multiple-choice questions and check your understanding.</p>
+      <p>Answer multiple-choice and true/false questions with feedback.</p>
       <span class="card-link">Take a test <span aria-hidden="true">→</span></span>
     </a>
     <a class="activity-card" href="{{ url_for('practice.game') }}">
       <span class="activity-icon" aria-hidden="true">🎮</span>
       <h3>Play Game</h3>
-      <p>A home for a future educational game experience.</p>
+      <p>Answer PEP questions as you race through a space station.</p>
       <span class="card-link">Explore the game area <span aria-hidden="true">→</span></span>
     </a>
   </div>

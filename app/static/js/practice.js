@@ -3,6 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!test) return;
 
   const questions = [...test.querySelectorAll(".test-question")];
+  const optionsByQuestion = questions.map((question) =>
+    [...question.querySelectorAll(".answer")]
+  );
   const numberButtons = [...test.querySelectorAll(".question-number")];
   const previous = test.querySelector("#previous-question");
   const next = test.querySelector("#next-question");
@@ -36,8 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     submit.disabled = submitted || selectedAnswers().some((selection) => !selection);
   };
 
-  questions.forEach((question, questionIndex) => {
-    const answers = [...question.querySelectorAll(".answer")];
+  optionsByQuestion.forEach((answers, questionIndex) => {
     answers.forEach((answer) => {
       answer.addEventListener("click", () => {
         if (submitted) return;
@@ -85,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const isCorrect = selected.dataset.answer === correctAnswer;
       if (isCorrect) score += 1;
 
-      const answers = [...question.querySelectorAll(".answer")];
+      const answers = optionsByQuestion[index];
       const correctOption = answers.find((answer) => answer.dataset.answer === correctAnswer);
       correctOption.classList.add("correct");
       if (!isCorrect) selected.classList.add("wrong");
@@ -96,10 +98,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const feedback = question.querySelector(".question-feedback");
       const correctText = correctOption.querySelector("span:last-child").textContent;
-      const answerText = correctAnswer === "true" || correctAnswer === "false"
-        ? correctText
-        : `${correctOption.querySelector(".answer-letter").textContent}. ${correctText}`;
-      feedback.textContent = `${isCorrect ? "Correct." : `Correct answer: ${answerText}.`} ${question.dataset.explanation}`.trim();
+      const letter = correctOption.querySelector(".answer-letter");
+      const answerText = letter ? `${letter.textContent}. ${correctText}` : correctText;
+      const outcome = isCorrect ? "Correct." : `Correct answer: ${answerText}.`;
+      feedback.textContent = `${outcome} ${question.dataset.explanation}`.trim();
       feedback.hidden = false;
       feedback.classList.toggle("incorrect", !isCorrect);
     });
@@ -113,8 +115,8 @@ document.addEventListener("DOMContentLoaded", () => {
   retry.addEventListener("click", () => {
     submitted = false;
     currentIndex = 0;
-    questions.forEach((question) => {
-      question.querySelectorAll(".answer").forEach((answer) => {
+    questions.forEach((question, index) => {
+      optionsByQuestion[index].forEach((answer) => {
         answer.disabled = false;
         answer.removeAttribute("aria-disabled");
         answer.setAttribute("aria-pressed", "false");
@@ -125,7 +127,6 @@ document.addEventListener("DOMContentLoaded", () => {
       feedback.classList.remove("incorrect");
       feedback.textContent = "";
     });
-    numberButtons.forEach((button) => button.classList.remove("answered"));
     result.hidden = true;
     result.textContent = "";
     submit.hidden = false;

@@ -1,0 +1,80 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>SYNTUITIVE PEP browser checks</title>
+<output id="result">Pending</output>
+<iframe id="activity" title="Activity under test"></iframe>
+<script>
+  const result = document.querySelector("#result");
+  const frame = document.querySelector("#activity");
+
+  function load(path) {
+    return new Promise((resolve) => {
+      frame.addEventListener("load", () => resolve(frame.contentDocument), { once: true });
+      frame.src = path;
+    });
+  }
+
+  function check(condition, description) {
+    if (!condition) throw new Error(description);
+  }
+
+  async function run() {
+    const cards = await load("/flashcards?subject=science");
+    const card = cards.querySelector("#flashcard");
+    const cardText = cards.querySelector("#flash-text");
+    check(cardText.textContent === "What is evaporation?", "Science deck loaded");
+    card.click();
+    check(card.getAttribute("aria-pressed") === "true", "Card flipped");
+    check(cardText.textContent.includes("liquid changes into gas"), "Answer revealed");
+    card.click();
+    check(cardText.textContent === "What is evaporation?", "Card flipped back");
+    card.click();
+    cards.querySelector("#flash-next").click();
+    check(card.getAttribute("aria-pressed") === "false", "Next resets card face");
+    cards.querySelector("#flash-previous").click();
+    check(cardText.textContent === "What is evaporation?", "Previous wraps the sample deck");
+
+    const practice = await load("/practice");
+    const questions = [...practice.querySelectorAll(".test-question")];
+    const numbers = [...practice.querySelectorAll(".question-number")];
+    const previous = practice.querySelector("#previous-question");
+    const next = practice.querySelector("#next-question");
+    const submit = practice.querySelector("#submit-test");
+    const retry = practice.querySelector("#retry-test");
+    check(questions.length === 24 && !questions[0].hidden, "Assessment begins at question one");
+    check(previous.disabled && submit.disabled, "Initial controls are disabled");
+    next.click();
+    check(questions[0].hidden && !questions[1].hidden, "Next advances the question");
+    previous.click();
+    check(!questions[0].hidden && questions[1].hidden, "Previous returns to question one");
+    questions.forEach((question, index) => {
+      numbers[index].click();
+      check(!question.hidden, "Direct navigation reveals the selected question");
+      const choices = [...question.querySelectorAll(".answer")];
+      const choice = choices.find((option) =>
+        (option.dataset.answer === question.dataset.correctAnswer) === (index !== 0)
+      );
+      choice.click();
+      check(numbers[index].classList.contains("answered"), "Question marked answered");
+      check(submit.disabled === (index < questions.length - 1), "Submit requires all answers");
+    });
+    check(next.disabled, "Next is disabled on the last question");
+    submit.click();
+    check(practice.querySelector("#test-result").textContent === "Your score: 23 out of 24.",
+      "Scoring handles correct and incorrect answers");
+    check(questions[0].querySelector(".answer.wrong:disabled"), "Incorrect choice is marked");
+    check(questions[0].querySelector(".question-feedback").textContent.includes("Correct answer:"),
+      "Incorrect answer shows feedback");
+    retry.click();
+    check(!questions[0].hidden && submit.disabled && retry.hidden, "Retake resets navigation");
+    check(!practice.querySelector(".answer.selected, .answer:disabled, .question-number.answered"),
+      "Retake clears selections, locks, and answered markers");
+    check(practice.querySelector("#test-result").hidden, "Retake hides the score");
+  }
+
+  run().then(() => {
+    result.textContent = "Passed";
+  }).catch((error) => {
+    result.textContent = `Failed: ${error.message}`;
+  });
+</script>
